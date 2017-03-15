@@ -1,0 +1,76 @@
+---
+- name: Provisioning VPC
+  hosts: localhost
+  gather_facts: true
+  #sudo_user: false
+  #Define the valiable file path as the playbook is dependent on the variables vpc_vars.yml file
+  pre_tasks: 
+    - include_vars: ../vars/vpc_vars.yml
+  tasks:
+    - name: Create a VPC with 2 public and 2 private subnets
+      ec2_vpc: 
+        state: present
+        cidr_block: '{{ cidr }}'
+        region: '{{ region }}'
+        resource_tags: '{"Name":"{{ prefix }}_vpc"}'
+#Defining public and private subnets in both the avalability zone.
+        subnets:     
+          - cidr: '{{ public_subnet_1 }}'
+            az:   '{{ public_subnet_az_1 }}'
+            resource_tags: '{"Name":"{{ prefix }}_public_subnet_1"}'
+          - cidr: '{{ public_subnet_2 }}'
+            az:   '{{ public_subnet_az_2 }}'
+            resource_tags: '{"Name":"{{ prefix }}_public_subnet_2"}'
+          - cidr: '{{ private_subnet_1 }}'
+            az:   '{{ private_subnet_az_1 }}'
+            resource_tags: '{"Name":"{{ prefix }}_private_subnet_1"}'
+          - cidr: '{{ private_subnet_2 }}'
+            az:   '{{ private_subnet_az_2 }}'
+            resource_tags: '{"Name":"{{ prefix }}_private_subnet_2"}'
+#Defining Ingernat gateway
+        internet_gateway: True
+#       resource_tags: '{"Name":"{{ prefix }}_Inernet_gateway"}'
+#Defining Public Route Table
+        route_tables:
+          - subnets: 
+              - '{{ public_subnet_1 }}'
+              - '{{ public_subnet_2 }}'
+            resource_tags: '{"Name":"{{ prefix }}_public_route_table"}'
+            routes: 
+              - dest: 0.0.0.0/0
+                gw: igw
+#           resource_tags: '{"Name":"{{ prefix }}_Inernet_gateway"}'
+#Defining Private Route Table
+          - subnets: 
+              - '{{ private_subnet_1 }}'
+              - '{{ private_subnet_2 }}'
+            resource_tags: '{"Name":"{{ prefix }}_private_route_table"}'
+            routes: 
+             - dest: 0.0.0.0/0
+               gw: igw
+      register: vpc
+#Defining Nat Gateway
+- name: Create nat gateway
+  hosts: localhost
+  roles: 
+    - nat-gateway
+
+  
+#Change route for VPC private subnets
+- name: Change the route for VPC private subnets
+  hosts: localhost
+  gather_facts: true
+  #sudo_user: false
+  pre_tasks: 
+    - include_vars: ../vars/vpc_vars.yml
+  tasks:
+    - name: Modifying private_route_table
+      ec2_vpc_route_table: 
+        vpc_id: '{{ vpc.vpc_id }}'
+        region: '{{ region }}'
+#        subnets: 
+#          - "{{ lookup('file', '/tmp/private-subnet') | replace('\n', '')}}"
+        routes: 
+          - dest: 0.0.0.0/0
+            gateway_id: "{{ lookup('file', '/tmp/nat-gateway') }}"   
+

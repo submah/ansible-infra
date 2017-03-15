@@ -1,0 +1,7 @@
+---
+
+- name: Copy the file to /tmp
+  template: src=get-vpc-id.sh dest=/tmp/get-vpc-id.sh mode=0755
+
+- name: Getting VPC-Id by executing the script
+  shell: sh /tmp/get-vpc-id.sh

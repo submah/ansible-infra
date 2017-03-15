@@ -1,0 +1,35 @@
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+  pre_tasks: 
+    - include_vars: ../../vars/ec2_vars.yml
+- name: Getting VPC-id
+  hosts: localhost
+  roles:
+    - get-vpc-id
+    - get-public-subnet-id
+    - get-security-group-name
+  tasks:
+
+    - name: Provisioning EC2 in Webser-security-group
+      ec2:
+        key_name: "{{ ec2_key_name }}"
+        region: '{{ region }}'
+        instance_type: "{{ instance_type }}"
+        image: "{{ ami_id }}"
+        group: "{{ lookup('file', '/tmp/get-security-group-name.out')}}"
+        wait: yes
+        wait_timeout: 500
+        termination_protection: no
+        volumes:
+          - device_name: /dev/xvda
+            volume_type: gp2
+            volume_size: 8
+            delete_on_termination: true
+            snapshot: snap-054bd8ceed9964217
+        count: 1
+        instance_tags:
+          Name: Webserver
+        vpc_subnet_id: "{{ lookup('file', '/tmp/get-public-subnet-id.txt.out') }}"
+        assign_public_ip: yes
+#  register: ec2info    

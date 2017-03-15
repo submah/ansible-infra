@@ -1,0 +1,5 @@
+- name: Copy the file to /tmp
+  template: src=get-security-group-name.sh dest=/tmp/get-security-group-name.sh mode=0755
+
+- name: Getting Security Group name by executing the script
+  shell: sh /tmp/get-security-group-name.sh

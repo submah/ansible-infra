@@ -1,0 +1,7 @@
+---
+
+- name: Copy the file to /tmp
+  template: src=create-nat-gw.sh dest=/tmp/create-nat-gw.sh mode=0755
+
+- name: Create NAT gateway by executing the script
+  shell: sh /tmp/create-nat-gw.sh
