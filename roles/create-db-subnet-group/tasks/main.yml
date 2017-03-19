@@ -1,0 +1,13 @@
+---
+- name: Create DB subnet group
+  rds_subnet_group:
+    state: present
+    name: "SG-DB"
+    description: "Database subnet group - MySql"
+#   vpc_id: "{{ lookup('file', '/tmp/get-vpc-id.out') }}"
+    region: "{{aws_region}}"
+    subnets:
+      -  "{{ lookup('file', '/tmp/get-private-subnet-id-1.txt.out') }}"
+      -  "{{ lookup('file', '/tmp/get-private-subnet-id-2.txt.out') }}"
+      -  "{{ lookup('file', '/tmp/get-public-subnet-id-1.txt.out') }}"
+      -  "{{ lookup('file', '/tmp/get-public-subnet-id-2.txt.out') }}"

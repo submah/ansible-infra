@@ -1,0 +1,29 @@
+---
+- name: provisioning RDS 
+  hosts: localhost
+  gather_facts: true
+  pre_tasks: 
+    - include_vars: ../../vars/rds_vars.yml
+  roles: 
+  - get-private-subnet-id
+  - get-private-subnet-zone 
+  tasks:
+    - name: provisioning RDS in Private Subnets
+      rds:
+        command: create
+        instance_name:          "{{rds_instance_name}}"
+        db_engine:              "{{rds_db_engine}}"
+        size:                   "{{rds_db_size}}"
+        instance_type:          "{{rds_instance_size}}"
+        username:               "{{rds_db_user_name}}"
+        password:               "{{rds_db_password}}"
+        tags:
+          Name:                 "{{rds_instance_name}}"
+        region:                 "{{aws_region}}"
+        vpc_security_groups:    "{{sg_group}}" 
+        multi_zone:             no
+        wait:                   yes
+        wait_timeout:           500
+        subnet:                 "{{ lookup('file', '/tmp/get-private-subnet-id.txt.out') }}"
+        zone:                   "{{ lookup('file', '/tmp/get-private-subnet-zone.txt.out') }}"
+      register: rdsinfo  

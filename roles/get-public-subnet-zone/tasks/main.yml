@@ -1,0 +1,5 @@
+- name: Copy the file to /tmp
+  template: src=get-public-subnet-zone.sh dest=/tmp/get-public-subnet-zone.sh mode=0755
+
+- name: Getting Public subnet zone by executing the script
+  shell: sh /tmp/get-public-subnet-zone.sh

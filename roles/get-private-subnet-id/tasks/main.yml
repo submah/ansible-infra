@@ -1,0 +1,5 @@
+- name: Copy the file to /tmp
+  template: src=get-private-subnet-id.sh dest=/tmp/get-private-subnet-id.sh mode=0755
+
+- name: Getting Private subnet-id by executing the script
+  shell: sh /tmp/get-private-subnet-id.sh

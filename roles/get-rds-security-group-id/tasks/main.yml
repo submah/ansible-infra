@@ -1,0 +1,5 @@
+- name: Copy the file to /tmp
+  template: src=get-rds-security-group-id.sh dest=/tmp/get-rds-security-group-id.sh mode=0755
+
+- name: Getting RDS Security Group Id by executing the script
+  shell: sh /tmp/get-rds-security-group-id.sh
