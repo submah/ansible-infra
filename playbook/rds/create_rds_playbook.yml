@@ -1,12 +1,19 @@
 ---
+
 - name: provisioning RDS 
   hosts: localhost
   gather_facts: true
   pre_tasks: 
     - include_vars: ../../vars/rds_vars.yml
   roles: 
-  - get-private-subnet-id
-  - get-private-subnet-zone 
+  - get-vpc-id
+  - get-private-subnet-zone
+  - get-private-subnet-id 
+  - get-public-subnet-zone
+  - get-public-subnet-id
+  - create-db-subnet-group
+  - create-vpc-rds-security-group
+  - get-rds-security-group-id
   tasks:
     - name: provisioning RDS in Private Subnets
       rds:
@@ -20,10 +27,14 @@
         tags:
           Name:                 "{{rds_instance_name}}"
         region:                 "{{aws_region}}"
-        vpc_security_groups:    "{{sg_group}}" 
+        vpc_security_groups:    "{{ lookup('file', '/tmp/get-rds-security-group-id.txt.out') }}" 
         multi_zone:             no
         wait:                   yes
         wait_timeout:           500
-        subnet:                 "{{ lookup('file', '/tmp/get-private-subnet-id.txt.out') }}"
-        zone:                   "{{ lookup('file', '/tmp/get-private-subnet-zone.txt.out') }}"
+        subnet: sg-db
+#          - "{{ lookup('file', '/tmp/get-private-subnet-id-1.txt.out') }}" 
+#          - "{{ lookup('file', '/tmp/get-private-subnet-id-2.txt.out') }}"
+#        zone:   
+#          - "{{ lookup('file', '/tmp/get-private-subnet-zone-1.txt.out') }}" 
+#          - "{{ lookup('file', '/tmp/get-private-subnet-zone-2.txt.out') }}"
       register: rdsinfo  

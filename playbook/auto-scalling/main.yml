@@ -1,0 +1,12 @@
+---
+- name: Provisioning Auto-Scalling-group-and-Launch-Configuration
+  hosts: localhost
+  gather_facts: true
+  pre_tasks:
+    - include_vars: ../../vars/aslc_vars.yml
+  roles:
+    - get-public-subnet-id
+    - get-public-subnet-zone
+    - create-elb
+    - create-aslc
+

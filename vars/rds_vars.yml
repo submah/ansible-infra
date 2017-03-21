@@ -3,7 +3,7 @@ rds_db_engine: MySQL
 rds_db_size: 5
 rds_instance_size: db.t2.micro
 rds_db_user_name: master
-rds_db_password: password@123
+rds_db_password: password#123
 aws_region: ap-northeast-1
-sg_group: rds-security-group
+#sg_group: sg-97ffa9f0
 

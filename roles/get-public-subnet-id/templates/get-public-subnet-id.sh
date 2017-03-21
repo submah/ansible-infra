@@ -4,7 +4,8 @@
 
 #Now filtering the list of Public subnets and store only one subnet in a text file called public-subnet-id.txt.out
 
-/bin/cat /tmp/get-public-subnet-id.txt | head -n 1 > /tmp/get-public-subnet-id.txt.out
+/bin/cat /tmp/get-public-subnet-id.txt | sed -n 1p > /tmp/get-public-subnet-id-1.txt.out
+/bin/cat /tmp/get-public-subnet-id.txt | sed -n 2p > /tmp/get-public-subnet-id-2.txt.out
 
 
 

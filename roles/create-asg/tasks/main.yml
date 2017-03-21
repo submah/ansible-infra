@@ -1,0 +1,15 @@
+---
+- name: Provisioning Auto Scaling Group for Production Environment
+  ec2_asg:
+    name: production-asg
+    load_balancers: [ 'provide ELB name here' ]
+    availability_zones: [ 'xxx', 'xxx' ] # provide availability zone for the public subnet 
+    launch_config_name: 'Production-ansible-Launch-Configuration'
+    min_size: 1
+    max_size: 4
+    desired_capacity: 1
+    vpc_zone_identifier: [ 'provide public/private subnet-id', 'provide public/private subnet-id' ]
+    tags: 
+      - environment: production
+        propagate_at_launch: no
+    

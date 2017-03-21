@@ -1,0 +1,4 @@
+ami_id: ami-021bad03
+key_name: Tokyo-key
+instance_type: t2.micro
+region: ap-northeast-1
