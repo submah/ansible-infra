@@ -1,9 +1,0 @@
----
-- name: provisioning RDS
-  hosts: localhost
-  gather_facts: true
-#  tasks:
-    - name: Gathering facts to search security goup
-        - ec2_group_facts:
-      register: ec2gfacts
-
