@@ -1,0 +1,11 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = ssh://github.com/submah/ansible-infra.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+	remote = git@github.com:submah/ansible-infra.git
+	merge = refs/heads/master

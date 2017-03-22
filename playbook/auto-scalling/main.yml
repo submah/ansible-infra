@@ -5,8 +5,12 @@
   pre_tasks:
     - include_vars: ../../vars/aslc_vars.yml
   roles:
+    - get-vpc-id
     - get-public-subnet-id
     - get-public-subnet-zone
+    - create-elb-sg
+    - get-elb-security-group-id
     - create-elb
     - create-aslc
+    - create-asg
 

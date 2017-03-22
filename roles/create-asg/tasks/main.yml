@@ -2,14 +2,97 @@
 - name: Provisioning Auto Scaling Group for Production Environment
   ec2_asg:
     name: production-asg
-    load_balancers: [ 'provide ELB name here' ]
-    availability_zones: [ 'xxx', 'xxx' ] # provide availability zone for the public subnet 
+    state: present      
+    region: '{{ region }}'
+    load_balancers: [ 'prod-elb-asg' ]
+# provide availability zone for the public/private subnet(s)
+    availability_zones: [ "{{ lookup('file', '/tmp/get-public-subnet-zone-1.txt.out') }}", 
+                          "{{ lookup('file', '/tmp/get-public-subnet-zone-2.txt.out') }}" ] 
     launch_config_name: 'Production-ansible-Launch-Configuration'
     min_size: 1
     max_size: 4
     desired_capacity: 1
-    vpc_zone_identifier: [ 'provide public/private subnet-id', 'provide public/private subnet-id' ]
+    vpc_zone_identifier: [ "{{ lookup('file', '/tmp/get-public-subnet-id-1.txt.out') }}",
+                           "{{ lookup('file', '/tmp/get-public-subnet-id-2.txt.out') }}" ]
     tags: 
       - environment: production
-        propagate_at_launch: no
-    
+        propagate_at_launch: yes
+  register: result_asg
+
+#Section for scale down policy
+- name: create scale down  policy
+  ec2_scaling_policy:
+    state: present
+    region: "{{ region }}"
+    name: scale-down-policy
+    adjustment_type: ChangeInCapacity
+#   asg_name: "{{ item }}"
+    asg_name: production-asg
+    scaling_adjustment: -1
+    min_adjustment_step: -1
+    cooldown: 300
+#  with_items: result_asg.name
+  register: scale_down_policy
+  tags: scaling_policy
+  
+- name: debugging scale_down_policy
+  debug: var=scale_down_policy
+   
+#Section for scale up policy
+- name: create scale up policy
+  ec2_scaling_policy:
+    state: present
+    region: "{{ region }}"
+    name: scale-up-policy
+    adjustment_type: ChangeInCapacity
+    asg_name: production-asg
+    scaling_adjustment: 1
+    min_adjustment_step: 1
+    cooldown: 300
+  register: scale_up_policy
+  tags: scaling_policy
+
+- name: debuging scale_up_policy
+  debug: var=scale_up_policy
+ 
+#Section for defining scale down Alarm
+- name: create scale down alarm
+  ec2_metric_alarm:
+    state: present
+    region: "{{ region }}"
+    name: "cpu-low"
+    metric: CPUUtilization
+    namespace: "AWS/EC2"
+    statistic: Average
+    comparison: "<="
+    threshold: 15.0
+    period: 300
+    evaluation_periods: 3
+    unit: "Percent"
+    description: "This will alarm when cpu usage average is lower than 15% for 15 minutes"
+    dimensions: 
+      AutoScalingGroupName: production-asg
+    alarm_actions: 
+      - "{{ scale_down_policy.arn }}"
+  tags: alarm
+
+#Section for defining scale up Alam
+- name: create scale up alarm
+  ec2_metric_alarm:
+    state: present
+    region: "{{ region }}"
+    name: "cpu-high"
+    metric: CPUUtilization
+    namespace: "AWS/EC2"
+    statistic: Average
+    comparison: ">="
+    threshold: 80.0
+    period: 300
+    evaluation_periods: 1
+    unit: "Percent"
+    description: "This will alarm when cpu usage average is higher than 80% for 5 minutes"
+    dimensions: 
+      AutoScalingGroupName: production-asg
+    alarm_actions: 
+      - "{{ scale_up_policy.arn }}"
+  tags: alarm

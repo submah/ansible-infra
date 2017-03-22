@@ -1,0 +1,5 @@
+- name: Copy the file to /tmp
+  template: src=get-elb-security-group-id.sh dest=/tmp/get-elb-security-group-id.sh mode=0755
+
+- name: Getting ELB Security Group Id by executing the script
+  shell: sh /tmp/get-elb-security-group-id.sh

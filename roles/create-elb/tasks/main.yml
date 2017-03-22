@@ -7,8 +7,12 @@
     cross_az_load_balancing: "yes"
     connection_draining_timeout: 60
     idle_timeout: 300
-    zones: [ "{{ lookup('file', '/tmp/get-public-subnet-zone-1.txt.out') }}", 
-             "{{ lookup('file', '/tmp/get-public-subnet-zone-2.txt.out') }}" ] 
+    subnets: [ "{{ lookup('file', '/tmp/get-public-subnet-id-1.txt.out') }}",
+               "{{ lookup('file', '/tmp/get-public-subnet-id-2.txt.out') }}" ]
+    security_group_ids: [ "{{ lookup('file', '/tmp/get-elb-security-group-id.txt.out') }}" ]
+                          
+#    zones: [ "{{ lookup('file', '/tmp/get-public-subnet-zone-1.txt.out') }}", 
+#             "{{ lookup('file', '/tmp/get-public-subnet-zone-2.txt.out') }}" ] 
       #- "{{ lookup('file', '/tmp/get-public-subnet-zone-1.txt.out') }}"
       #- "{{ lookup('file', '/tmp/get-public-subnet-zone-2.txt.out') }}"
     listeners:

@@ -1,0 +1,61 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: true
+#  tasks:
+    - name: Create-NAT-Security-Group
+      ec2_group:
+        name: Prod_NAT-SG
+        description: Production NAT security group
+        vpc_id: "{{ lookup('file', '/tmp/get-vpc-id.out') }}"
+        region: '{{ aws_region }}'
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port:   22
+            cidr_ip:   0.0.0.0/0
+
+          - proto: tcp
+            from_port: 80
+            to_port:   80
+            cidr_ip:   0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      register: natsg
+
+    - name: Tagging_NAT_Security_Group
+      ec2_tag:
+        resource: "{{ natsg.group_id }}"
+        region: '{{ aws_region }}'
+        tags:
+          Name: NAT-SG
+        state: present
+
+    - name: Create-VPC-RDS-Security-Group
+      ec2_group:
+        name: prod-rds-security-group
+        description: Security group for prod-rds
+        vpc_id: "{{ lookup('file', '/tmp/get-vpc-id.out') }}" 
+        region: '{{ aws_region }}'
+        rules: 
+          - proto: tcp
+            from_port: 3306
+            to_port:   3306
+            group_id: "{{ natsg.group_id }}"
+        rules_egress:
+          - proto:     all
+            cidr_ip:   0.0.0.0/0
+      register: rdssg
+ 
+    - name: Tagging the RDS security group
+      ec2_tag:
+        resource: "{{ rdssg.group_id }}"
+        region: ap-northeast-1
+        tags:
+          Name: "prod-rds-security-group"
+        state: present
+    
+         
+
+

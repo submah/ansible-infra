@@ -1,0 +1,24 @@
+---
+- name: Provisioning Auto-Scalling-Launch-Configuration
+  hosts: localhost
+  gather_facts: true
+  pre_tasks: 
+    - include_vars: ../../vars/as_vars.yml
+  roles:
+    - create-asg
+  tasks:
+    - name: Provisioning Auto-Scalling-Launch-Configuration
+      ec2_lc:
+        name: Production-ansible-Launch-Configuration
+        image_id: "{{ ami_id }}"
+        region: "{{ region }}"
+        assign_public_ip: yes
+        key_name: "{{ key_name }}"
+        security_groups: [ 'sg-b3cbe6d4' ]
+        instance_type: "{{ instance_type }}"
+        volumes:
+        - device_name: /dev/xvda
+          volume_size: 8
+          volume_type: gp2
+          delete_on_termination: true
+
